@@ -240,7 +240,7 @@ Represents the validity of a From trend, extends AbstractValidity
 Use the method `parse(string)` of the `MetarParser` to parse a metar.
 
 ```python
-from metar_taf_parser.parser.parser import MetarParser
+from dgmeteo.parser.parser import MetarParser
 
 metar = MetarParser().parse('KTTN 051853Z 04011KT 9999 VCTS SN FZFG BKN003 OVC010 M02/M02 A3006')
 
@@ -253,7 +253,7 @@ Use the method `parse(string)` of the TAFParser to parse a TAF message.
 The message must start with `TAF` in order to be parsed.
 
 ```python
-from metar_taf_parser.parser.parser import TafParser
+from dgmeteo.parser.parser import TafParser
 
 taf = TafParser().parse(
     'TAF LFPG 150500Z 1506/1612 17005KT 6000 SCT012 TEMPO 1506/1509 3000 BR BKN006 PROB40 TEMPO 1506/1508 0400 BCFG BKN002 PROB40 TEMPO 1512/1516 4000 -SHRA FEW030TCU BKN040 BECMG 1520/1522 CAVOK TEMPO 1603/1608 3000 BR BKN006 PROB40 TEMPO 1604/1607 0400 BCFG BKN002 TX17/1512Z TN07/1605Z')
