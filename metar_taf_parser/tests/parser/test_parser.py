@@ -5,7 +5,7 @@ from parameterized import parameterized
 from metar_taf_parser.model.enum import Intensity, Phenomenon, Descriptive, DepositType, DepositCoverage, WeatherChangeType, CloudQuantity, CloudType, \
     TimeIndicator, TurbulenceIntensity, IcingIntensity
 from metar_taf_parser.model.model import AbstractWeatherContainer, Visibility, Wind
-from metar_taf_parser.parser.parser import AbstractParser, MetarParser, _parse_validity, _parse_temperature, TAFParser, \
+from metar_taf_parser.parser.parser import AbstractParser, MetarParser, _parse_validity, _parse_temperature, TafParser, \
     RemarkParser
 from metar_taf_parser.commons.i18n import _
 
@@ -348,7 +348,7 @@ class TAFParserTestCase(unittest.TestCase):
             FM261700 17007KT 9999 SKC QNH2974INS
             FM262100 19013KT 9999 SKC QNH2967INS AUTOMATED SENSOR METWATCH 2606 TIL 2614 TX42/2623Z TN24/2614Z
         """
-        taf = TAFParser().parse(code)
+        taf = TafParser().parse(code)
 
         self.assertEqual('KNYL', taf.station)
         self.assertEqual(26, taf.day)
@@ -363,7 +363,7 @@ class TAFParserTestCase(unittest.TestCase):
     def test_parse_with_invalid_line_breaks(self):
         code = 'TAF LFPG 150500Z 1506/1612 17005KT 6000 SCT012 \n' + 'TEMPO 1506/1509 3000 BR BKN006 PROB40 \n' + 'TEMPO 1506/1508 0400 BCFG BKN002 PROB40 \n' + 'TEMPO 1512/1516 4000 -SHRA FEW030TCU BKN040 \n' + 'BECMG 1520/1522 CAVOK \n' + 'TEMPO 1603/1608 3000 BR BKN006 PROB40 \n TEMPO 1604/1607 0400 BCFG BKN002 TX17/1512Z TN07/1605Z'
 
-        taf = TAFParser().parse(code)
+        taf = TafParser().parse(code)
 
         self.assertEqual('LFPG', taf.station)
         self.assertEqual(15, taf.day)
@@ -488,7 +488,7 @@ class TAFParserTestCase(unittest.TestCase):
         self.assertEqual(40, trend_5.probability)
 
     def test_parse_without_line_breaks(self):
-        taf = TAFParser().parse(
+        taf = TafParser().parse(
             'TAF LSZH 292025Z 2921/3103 VRB03KT 9999 FEW020 BKN080 TX20/3014Z TN06/3003Z PROB30 TEMPO 2921/2923 SHRA BECMG 3001/3004 4000 MIFG NSC PROB40 3003/3007 1500 BCFG SCT004 PROB30 3004/3007 0800 FG VV003 BECMG 3006/3009 9999 FEW030 PROB40 TEMPO 3012/3017 30008KT')
 
         # Check on time delivery.
@@ -618,7 +618,7 @@ class TAFParserTestCase(unittest.TestCase):
         self.assertEqual(40, tempo1.probability)
 
     def test_parse_without_line_breaks_and_ending_temperature(self):
-        taf = TAFParser().parse(
+        taf = TafParser().parse(
             'TAF KLSV 120700Z 1207/1313 VRB06KT 9999 SCT250 QNH2992INS BECMG 1217/1218 10010G15KT 9999 SCT250 QNH2980INS BECMG 1303/1304 VRB06KT 9999 FEW250 QNH2979INS TX42/1223Z TN24/1213Z')
 
         # Check on time delivery.
@@ -693,14 +693,14 @@ class TAFParserTestCase(unittest.TestCase):
         self.assertIsNone(becmg1.clouds[0].type)
 
     def test_parse_with_2_taf(self):
-        taf = TAFParser().parse('TAF TAF LFPG 191100Z 1912/2018 02010KT 9999 FEW040 PROB30')
+        taf = TafParser().parse('TAF TAF LFPG 191100Z 1912/2018 02010KT 9999 FEW040 PROB30')
 
         self.assertIsNotNone(taf)
         self.assertEqual(1, len(taf.trends))
         self.assertEqual(30, taf.trends[0].probability)
 
     def test_parse_with_wind_shear(self):
-        taf = TAFParser().parse('TAF KMKE 011530 0116/0218 WS020/24045KT FM010200 17005KT P6SM SKC WS020/23055KT')
+        taf = TafParser().parse('TAF KMKE 011530 0116/0218 WS020/24045KT FM010200 17005KT P6SM SKC WS020/23055KT')
 
         # THEN the windshear of the principle part is decoded
         self.assertEqual(2000, taf.wind_shear.height)
@@ -721,7 +721,7 @@ class TAFParserTestCase(unittest.TestCase):
         self.assertEqual(55, fm.wind_shear.speed)
 
     def test_parse_with_nautical_miles_visibility(self):
-        taf = TAFParser().parse(
+        taf = TafParser().parse(
             'TAF AMD CZBF 300939Z 3010/3022 VRB03KT 6SM -SN OVC015 TEMPO 3010/3012 11/2SM -SN OVC009 \nFM301200 10008KT 2SM -SN OVC010 TEMPO 3012/3022 3/4SM -SN VV007 RMK FCST BASED ON AUTO OBS. NXT FCST BY 301400Z')
 
         # THEN the visibility of the main event is 6 SM
@@ -735,7 +735,7 @@ class TAFParserTestCase(unittest.TestCase):
         self.assertTrue(taf.amendment)
 
     def test_parse_with_remark(self):
-        taf = TAFParser().parse(
+        taf = TafParser().parse(
             'TAF CZBF 300939Z 3010/3022 VRB03KT 6SM -SN OVC015 RMK FCST BASED ON AUTO OBS. NXT FCST BY 301400Z\n TEMPO 3010/3012 11/2SM -SN OVC009 FM301200 10008KT 2SM -SN OVC010 \nTEMPO 3012/3022 3/4SM -SN VV007')
 
         self.assertIsNotNone(taf)
@@ -743,7 +743,7 @@ class TAFParserTestCase(unittest.TestCase):
         self.assertEqual(9, len(taf.remarks))
 
     def test_parse_with_trend_remark(self):
-        taf = TAFParser().parse(
+        taf = TafParser().parse(
             'TAF CZBF 300939Z 3010/3022 VRB03KT 6SM -SN OVC015\n TEMPO 3010/3012 11/2SM -SN OVC009 FM301200 10008KT 2SM -SN OVC010 TEMPO 3012/3022 3/4SM -SN VV007 RMK FCST BASED ON AUTO OBS. NXT FCST BY 301400Z')
 
         self.assertEqual(3, len(taf.trends))
@@ -751,7 +751,7 @@ class TAFParserTestCase(unittest.TestCase):
         self.assertEqual(9, len(taf.trends[2].remarks))
 
     def test_parse_with_remarks_forecast(self):
-        taf = TAFParser().parse(
+        taf = TafParser().parse(
             """TAF CYTL 121940Z 1220/1308
               TEMPO 1303/1308 2SM -SN RMK FCST BASED ON AUTO OBS. FCST BASED ON OBS BY OTHER SRCS. WIND SENSOR INOP. NXT FCST BY 130200Z"""
         )
@@ -763,7 +763,7 @@ class TAFParserTestCase(unittest.TestCase):
         self.assertEqual(Phenomenon.SNOW, taf.tempos()[0].weather_conditions[0].phenomenons[0])
 
     def test_parse_trend_visibility(self):
-        taf = TAFParser().parse(
+        taf = TafParser().parse(
             """TAF AMD KEWR 191303Z 1913/2018 09006KT 5SM -RA BR BKN007 OVC025
             FM191600 17007KT P6SM BKN020
             FM192100 26008KT P3SM SCT030 SCT050
@@ -782,15 +782,15 @@ class TAFParserTestCase(unittest.TestCase):
         self.assertEqual('P9SM', taf.fms()[3].visibility.distance)
 
     def test_parse_canceled(self):
-        taf = TAFParser().parse('TAF VTBD 281000Z 2812/2912 CNL=')
+        taf = TafParser().parse('TAF VTBD 281000Z 2812/2912 CNL=')
         self.assertTrue(taf.canceled)
 
     def test_parse_corrected(self):
-        taf = TAFParser().parse('TAF COR EDDS 201148Z 2012/2112 31010KT CAVOK BECMG 2018/2021 33004KT BECMG 2106/2109 07005KT')
+        taf = TafParser().parse('TAF COR EDDS 201148Z 2012/2112 31010KT CAVOK BECMG 2018/2021 33004KT BECMG 2106/2109 07005KT')
         self.assertTrue(taf.corrected)
 
     def test_parse_with_turbulence_and_icing(self):
-        taf = TAFParser().parse(
+        taf = TafParser().parse(
             """TAF KLSV 222300Z 2223/2405 21020G35KT 8000 BLDU BKN160 530009 630009 QNH2941INS
               TEMPO 2223/2302 23035G52KT BKN150 560009
               BECMG 2305/2306 35015G25KT 9999 VCSH BKN140 520009 QNH2948INS
@@ -813,7 +813,7 @@ class TAFParserTestCase(unittest.TestCase):
         self.assertEqual(9000, taf.icings[0].depth)
 
     def test_parse_with_icings_turbulence_trends(self):
-        taf = TAFParser().parse(
+        taf = TafParser().parse(
             """TAF AMD KNID 222300Z 0115/0215 21006KT 9999 SCT250 QNH2981INS
               BECMG 0116/0118 19014G22KT 9999 FEW120 SCT250 520009 520909 QNH2978INS WND 160V230
               BECMG 0118/0120 19018G26KT 9000 BLDU FEW003 FEW120 SCT250 530009 530909 QNH2972INS
@@ -838,7 +838,7 @@ class TAFParserTestCase(unittest.TestCase):
         self.assertEqual(2, len(taf.becmgs()[5].turbulence))
 
     def test_parse_with_station_begining_with_FM(self):
-        taf = TAFParser().parse(
+        taf = TafParser().parse(
             """TAF FMMI 082300Z 0900/1006 16006KT 9999 FEW017 BKN020 PROB30
             TEMPO 0908/0916 4500 RADZ
             BECMG 0909/0911 10010KT

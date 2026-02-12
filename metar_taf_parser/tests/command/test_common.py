@@ -8,7 +8,7 @@ from metar_taf_parser.command.common import (
     WindCommand,
 )
 from metar_taf_parser.model.enum import CloudQuantity, CloudType
-from metar_taf_parser.model.model import TAF, Metar
+from metar_taf_parser.model.model import Taf, Metar
 
 
 class CommonTestCase(unittest.TestCase):
@@ -104,7 +104,7 @@ class CommonTestCase(unittest.TestCase):
                 vis_str = f'3000{dir}'
                 self.assertTrue(command.can_parse(vis_str))
 
-                taf = TAF()
+                taf = Taf()
                 self.assertTrue(command.execute(taf, vis_str))
                 self.assertEqual(taf.visibility.min_distance, 3000)
                 self.assertEqual(taf.visibility.min_direction, dir)

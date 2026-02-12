@@ -7,7 +7,7 @@ This project provides METAR and TAF parsers.
 ## Install
 
 ```shell
-pip install metar-taf-parser-mivek
+poetry add dgmeteo
 ```
 
 ## Structure
@@ -25,7 +25,7 @@ This package contains multiple modules
 
 ### Parser package
 
-This package contains the parser module with the `MetarParser` and `TAFParser` classes.
+This package contains the parser module with the `MetarParser` and `TafParser` classes.
 
 ## Model
 
@@ -86,7 +86,7 @@ Represents the weather part of a METAR, TAF or trend.
 
 Represents the temperature part of a TAF. 
 
--   temperature: `int`. The temperature in celsius degrees.
+-   temperature: `int`. The temperature in Celsius degrees.
 -   day: `int`. Day of the occurrence.
 -   hour: `int`. Hour of the occurrence.
 
@@ -116,7 +116,7 @@ Represents a cloud layer in METAR, TAF or trend object.
 
 Represents the icing in a TAF or TAFTrend object.
 
--   intensity: `IcingIntensity`. The intensity of an icing.
+-   intensity: `IcingIntensity`. The intensity of icing.
 -   base_height: `int`. The base height of an icing element in feet.
 -   depth: `int`. The icing layer depth in feet. Adding this to the base height determines the top limit of the icing.
 
@@ -124,7 +124,7 @@ Represents the icing in a TAF or TAFTrend object.
 
 Represents the turbulence in a TAF or TAFTrend object.
 
--   intensity: `TurbulenceIntensity`. The intensity of a turbulence.
+-   intensity: `TurbulenceIntensity`. The intensity of turbulence.
 -   base_height: `int`. The base height of a turbulence element in feet.
 -   depth: `int`. The turbulence layer depth in feet. Adding this to the base height determines the top limit of the turbulence.
 
@@ -148,7 +148,7 @@ Abstract class containing the basic fields of METAR, TAF or trend objects.
 -   cavok: `bool`. Indicates whether the message is CAVOK (Ceiling and visibility OK)
 -   remark: `str`. The remark part of the message.
 -   remarks: `list[str]`. List of remarks. Each element is a different remark or token 
--   clouds: `[Cloud]`. Array of clouds elements.
+-   clouds: `[Cloud]`. Array of cloud elements.
 -   weather_conditions: `[WeatherCondition]`. Array of weather conditions.
 
 #### AbstractValidity
@@ -178,8 +178,8 @@ Class extending the AbstractWeatherContainer. Abstract parent class of METAR and
 
 Class representing a metar object.
 
--   temperature: `int`. The temperature in celsius.
--   dew_point: `int`. The dew_point in celsius.
+-   temperature: `int`. The temperature in Celsius.
+-   dew_point: `int`. The dew_point in Celsius.
 -   altimeter: `float`. The altimeter value in HPa.
 -   nosig: `bool`. Whether the message is nosig: No significant changes to come.
 -   runway_info: `[RunwayInfo]`. Array of runway information.
@@ -253,9 +253,9 @@ Use the method `parse(string)` of the TAFParser to parse a TAF message.
 The message must start with `TAF` in order to be parsed.
 
 ```python
-from metar_taf_parser.parser.parser import TAFParser
+from metar_taf_parser.parser.parser import TafParser
 
-taf = TAFParser().parse(
+taf = TafParser().parse(
     'TAF LFPG 150500Z 1506/1612 17005KT 6000 SCT012 TEMPO 1506/1509 3000 BR BKN006 PROB40 TEMPO 1506/1508 0400 BCFG BKN002 PROB40 TEMPO 1512/1516 4000 -SHRA FEW030TCU BKN040 BECMG 1520/1522 CAVOK TEMPO 1603/1608 3000 BR BKN006 PROB40 TEMPO 1604/1607 0400 BCFG BKN002 TX17/1512Z TN07/1605Z')
 ```
 
@@ -270,4 +270,4 @@ The following locales are supported:
 - it
 - ru
 
-To add or complete locales please see [CONTRIBUTING](CONTRIBUTING.md)
+To add or complete locales, please see [CONTRIBUTING](CONTRIBUTING.md)

@@ -643,7 +643,7 @@ class Metar(AbstractWeatherCode):
     runways_info = property(_get_runways_info)
 
 
-class TAF(ITafGroups, AbstractWeatherCode):
+class Taf(ITafGroups, AbstractWeatherCode):
 
     def __init__(self):
         ITafGroups.__init__(self)
@@ -745,7 +745,7 @@ class MetarTrend(AbstractTrend):
     times = property(_get_times)
 
 
-class TAFTrend(AbstractTrend, ITafGroups):
+class TafTrend(AbstractTrend, ITafGroups):
     def __init__(self, weather_change_type: WeatherChangeType):
         ITafGroups.__init__(self)
         AbstractTrend.__init__(self, weather_change_type)

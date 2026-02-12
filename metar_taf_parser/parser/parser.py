@@ -10,7 +10,7 @@ from metar_taf_parser.commons import converter
 from metar_taf_parser.commons.exception import TranslationError
 from metar_taf_parser.model.enum import Flag, Intensity, Descriptive, Phenomenon, TimeIndicator, WeatherChangeType
 from metar_taf_parser.model.model import WeatherCondition, Visibility, Metar, TemperatureDated, \
-    AbstractWeatherContainer, TAF, TAFTrend, MetarTrend, Validity, FMValidity, MetarTrendTime
+    AbstractWeatherContainer, Taf, TafTrend, MetarTrend, Validity, FMValidity, MetarTrendTime, TafTrend
 
 
 def parse_delivery_time(abstract_weather_code, time_string):
@@ -241,7 +241,7 @@ class MetarParser(AbstractParser):
         return metar
 
 
-class TAFParser(AbstractParser):
+class TafParser(AbstractParser):
     """
     Parser of TAF messages.
     """
@@ -256,12 +256,12 @@ class TAFParser(AbstractParser):
         self._taf_command_supplier = TAFCommandSupplier()
 
     def _parse_initial_taf(self, input: str):
-        taf = TAF()
+        taf = Taf()
         lines = self._extract_lines_tokens(input)
-        if TAFParser.TAF != lines[0][0]:
+        if TafParser.TAF != lines[0][0]:
             return
         index = 1
-        if TAFParser.TAF == lines[0][1]:
+        if TafParser.TAF == lines[0][1]:
             index = 2
         if _parse_flags(taf, lines[0][index]):
             index += 1
@@ -289,9 +289,9 @@ class TAFParser(AbstractParser):
             if AbstractParser.RMK == token:
                 parse_remark(taf, lines[0], i)
                 break
-            elif token.startswith(TAFParser.TX):
+            elif token.startswith(TafParser.TX):
                 taf.max_temperature = _parse_temperature(token)
-            elif token.startswith(TAFParser.TN):
+            elif token.startswith(TafParser.TN):
                 taf.min_temperature = _parse_temperature(token)
             elif command:
                 command.execute(taf, token)
@@ -318,14 +318,14 @@ class TAFParser(AbstractParser):
 
         if len(lines_token) > 1:
             last_line = lines_token[len(lines) - 1]
-            temperatures = list(filter(lambda x: x.startswith(TAFParser.TX) or x.startswith(TAFParser.TN), last_line))
+            temperatures = list(filter(lambda x: x.startswith(TafParser.TX) or x.startswith(TafParser.TN), last_line))
 
             if temperatures:
                 lines_token[0] = lines_token[0] + temperatures
-                lines_token[len(lines) - 1] = list(filter(lambda x: not x.startswith(TAFParser.TX) and not x.startswith(TAFParser.TN), last_line))
+                lines_token[len(lines) - 1] = list(filter(lambda x: not x.startswith(TafParser.TX) and not x.startswith(TafParser.TN), last_line))
         return lines_token
 
-    def _parse_line(self, taf: 'TAF', line_tokens: list):
+    def _parse_line(self, taf: 'Taf', line_tokens: list):
         """
         Parses the tokens of the line and updates the TAF object.
         :param taf: TAF object to update
@@ -333,21 +333,21 @@ class TAFParser(AbstractParser):
         :return: None
         """
         index = 1
-        if line_tokens[0].startswith(TAFParser.FM):
-            trend = TAFTrend(WeatherChangeType.FM)
+        if line_tokens[0].startswith(TafParser.FM):
+            trend = TafTrend(WeatherChangeType.FM)
             trend.validity = _parse_from_validity(line_tokens[0])
-        elif line_tokens[0].startswith(TAFParser.PROB):
-            trend = TAFTrend(WeatherChangeType.PROB)
-            if len(line_tokens) > 1 and TAFParser.TEMPO == line_tokens[1]:
-                trend = TAFTrend(WeatherChangeType(line_tokens[1]))
+        elif line_tokens[0].startswith(TafParser.PROB):
+            trend = TafTrend(WeatherChangeType.PROB)
+            if len(line_tokens) > 1 and TafParser.TEMPO == line_tokens[1]:
+                trend = TafTrend(WeatherChangeType(line_tokens[1]))
                 index = 2
             trend.probability = int(line_tokens[0][4:])
         else:
-            trend = TAFTrend(WeatherChangeType(line_tokens[0]))
+            trend = TafTrend(WeatherChangeType(line_tokens[0]))
         self._parse_trend(index, line_tokens, trend)
         taf.add_trend(trend)
 
-    def _parse_trend(self, index: int, line: list, trend: TAFTrend):
+    def _parse_trend(self, index: int, line: list, trend: TafTrend):
         """
         Parses a trend of the TAF
         :param index: the index at which the array should be parsed
